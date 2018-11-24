@@ -14,27 +14,61 @@ arr = [
     [0,0,3,0,0,2]
 ]
 
-#
-n = 6
-numColors = 3
+def constructRule(arr)
+    #
+    n = 6
+    numColors = 3
 
-# create a 3d matrix of boolean vars
+    # create a 3d matrix of boolean vars
 
-m = []
-colorClause = []
-for i in range(0,numColors):
-    m.append([BoolVector(n)])
-    for j in range(1,n):
+    m = []
+    colorClause = []
+    for i in range(0,numColors):
         m.append([BoolVector(n)])
-for k in range(0,numColors-1): # each color
-    for i in range(0,n): # each row
-        for j in range(0,n): # each colum
-            for k2 in range(k+1,numColors): # each color
-                colorClause.append( Or(Not(m[k][i][j]), m[k2][i][j])) # color in this cell implies no other color in other cells
+        for j in range(1,n):
+            m.append([BoolVector(n)])
+    for k in range(0,numColors-1): # each color
+        for i in range(0,n): # each row
+            for j in range(0,n): # each colum
+                for k2 in range(k+1,numColors): # each color
+                    colorClause.append( Or(Not(m[k][i][j]), m[k2][i][j])) # color in this cell implies no other color in other cells
 
 
+    
+    s = Solver()
 
-s = Solver()
+def colorCellRule(k,matrix,currentColorMatrix,n):
+    # currentColorMatrix should only contains 0 and 1, where 1 is start and end
+    clauses = []
+
+    for i in range(0,n):
+        for j in range(0,n):
+            if currentColorMatrix[i][j] == 1:
+                clauses.append(Implies(matrix[k][i + 1][j], Not(matrix[k][i - 1][j])))
+                clauses.append(Implies(matrix[k][i + 1][j], Not(matrix[k][i][j + 1])))
+                clauses.append(Implies(matrix[k][i + 1][j], Not(matrix[k][i][j - 1])))
+
+                clauses.append(Implies(matrix[k][i - 1][j], Not(matrix[k][i][j + 1])))
+                clauses.append(Implies(matrix[k][i - 1][j], Not(matrix[k][i][j - 1])))
+
+                clauses.append(Implies(matrix[k][i][j + 1], Not(matrix[k][i][j - 1])))
+            else:
+
+                """
+                     a 
+                    b c
+                     d
+                    
+                    a & b & -c & -d
+                    a & -b & c & -d
+                    a & -b & -c & -d
+                    
+                    
+                
+                """
+                clauses.append( Or( Implies(matrix[k][i][j], Not(matrix[k][i][j - 1])))
+
+
 
 
 
