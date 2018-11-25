@@ -1,23 +1,39 @@
 from z3 import Solver, Bool, Bools, Or, And, Not, Implies, If, BoolVector
 
-# Create one variable at at time
-a = Bool('a')
-
-# Create multiple variables at once
-b, c, d, e, f, g = Bools('b c d e f g')
-
-arr = [
-    [0,0,0,0,0,0],
+# test
+"""
+YES
+   [[0,0,0,0,0,0],
     [1,0,0,0,3,0],
     [2,0,0,0,0,0],
     [0,0,0,0,1,0],
-    [0,0,3,0,0,2]
+    [0,0,3,0,0,2]]
+    
+NO
+    [
+    [1,0,0,3,0],
+    [2,0,0,0,0],
+    [0,0,0,1,0],
+    [0,3,0,0,2],
+    [0,0,0,0,0]]
+    
+NO
+    [
+    [1,0,2],
+    [0,0,0],
+    [2,0,1]
+    ]
+"""
+arr = [
+[1,0,2],
+[0,0,0],
+[2,0,1]
 ]
 
-def constructRule(arr)
+def constructDistinctRule(arr,colorList):
     #
-    n = 6
-    numColors = 3
+    n = len(arr)
+    numColors = len(colorList)
 
     # create a 3d matrix of boolean vars
 
@@ -33,17 +49,21 @@ def constructRule(arr)
                 for k2 in range(k+1,numColors): # each color
                     colorClause.append( Or(Not(m[k][i][j]), m[k2][i][j])) # color in this cell implies no other color in other cells
 
-
+    return colorClause
     
-    s = Solver()
 
-def colorCellRule(k,matrix,currentColorMatrix,n):
+
+def constructcolorCellRule(k,matrix,currentColorMatrix):
     # currentColorMatrix should only contains 0 and 1, where 1 is start and end
+    n = len(matrix)
     clauses = []
 
     for i in range(0,n):
         for j in range(0,n):
             if currentColorMatrix[i][j] == 1:
+
+                clauses.append( Or( matrix[k][i + 1][j], matrix[k][i - 1][j] , matrix[k][i][j + 1], matrix[k][i][j - 1] ) )
+
                 clauses.append(Implies(matrix[k][i + 1][j], Not(matrix[k][i - 1][j])))
                 clauses.append(Implies(matrix[k][i + 1][j], Not(matrix[k][i][j + 1])))
                 clauses.append(Implies(matrix[k][i + 1][j], Not(matrix[k][i][j - 1])))
@@ -58,86 +78,102 @@ def colorCellRule(k,matrix,currentColorMatrix,n):
                      a 
                     b c
                      d
+                     
+                    a or b or c or d
+                    a -> (b or c or d)
+                    (a -> b) -> -c
+                    (a -> b) -> -d
+                    (a -> c) -> -b
+                    (a -> c) -> -d
+                    (a -> d) -> -b
+                    (a -> d) -> -c
                     
-                    a & b & -c & -d
-                    a & -b & c & -d
-                    a & -b & -c & -d
+                    b -> (a or c or d)
+                    (b -> c) -> -a
+                    (b -> c) -> -d
+                    (b -> d) -> -a
+                    (b -> d) -> -c
                     
-                    
-                
+                    c -> (a or b or d)
+                    (c -> d) -> -a
+                    (c -> d) -> -b
                 """
-                clauses.append( Or( Implies(matrix[k][i][j], Not(matrix[k][i][j - 1])))
+
+                clauses.append( Or( matrix[k][i + 1][j], matrix[k][i - 1][j], matrix[k][i][j + 1], matrix[k][i][j - 1] ))
+
+                clauses.append( Implies(matrix[k][i + 1][j], Or(matrix[k][i - 1][j], matrix[k][i][j + 1], matrix[k][i][j - 1])) )
+                clauses.append( Implies( Implies(matrix[k][i + 1][j], matrix[k][i - 1][j]),Not(matrix[k][i][j + 1]) ) )
+
+                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i - 1][j]), Not(matrix[k][i][j - 1])))
+                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i - 1][j]), Not(matrix[k][i][j + 1])))
+                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i][j + 1]), Not(matrix[k][i - 1][j])))
+                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i][j + 1]), Not(matrix[k][i][j - 1])))
+                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i][j - 1]), Not(matrix[k][i - 1][j])))
+                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i][j - 1]), Not(matrix[k][i][j + 1])))
+
+                clauses.append( Implies(matrix[k][i - 1][j], Or(matrix[k][i + 1][j], matrix[k][i][j + 1], matrix[k][i][j - 1])))
+                clauses.append(Implies(Implies(matrix[k][i - 1][j], matrix[k][i][j + 1]), Not(matrix[k][i + 1][j])))
+                clauses.append(Implies(Implies(matrix[k][i - 1][j], matrix[k][i][j + 1]), Not(matrix[k][i][j - 1])))
+                clauses.append(Implies(Implies(matrix[k][i - 1][j], matrix[k][i][j - 1]), Not(matrix[k][i + 1][j])))
+                clauses.append(Implies(Implies(matrix[k][i - 1][j], matrix[k][i][j - 1]), Not(matrix[k][i][j + 1])))
+
+                clauses.append( Implies(matrix[k][i][j + 1], Or(matrix[k][i + 1][j], matrix[k][i - 1][j], matrix[k][i][j - 1])))
+                clauses.append(Implies(Implies(matrix[k][i][j + 1], matrix[k][i][j - 1]), Not(matrix[k][i + 1][j])))
+                clauses.append(Implies(Implies(matrix[k][i][j + 1], matrix[k][i][j - 1]), Not(matrix[k][i - 1][j])))
+    return clauses
 
 
+def transformInput(arr,colorList):
 
+    processedArr = []
 
+    for k in colorList:
+        colorM = []
+        for i in range(0,len(arr)):
+            colorRow = []
+            for j in range(0,len(arr[0])):
+                colorRow.append(1 if arr[i][j] == k else 0)
+            colorM.append(colorRow)
+        processedArr.append(colorM)
 
-# Construct clauses
-c1 = Or(b, d, Not(f))
-c1.add(a)
-c2 = Or(a, Not(c), e)
-c3 = Or(Not(a), f)
-c4 = a
+    return processedArr
+def getColorList(arr):
+    numColor = {0}
+    for i in range(0, len(arr)):
+        numColor.union(set(arr[i]))
 
-# AND all clauses together
-formula = And(c1, c2, c3, c4)
+    colorList = list(numColor)
+    colorList.sort()
+    colorList.pop(0)  # take out color 0
+    return colorList
 
-# Add formula to solver
-s.add(formula)
+def constructFormula(arr):
+    colorList = getColorList(arr)
+    processedArr = transformInput(arr,colorList)
 
-# Alternatively, you can call s.add() multiple times and
-# the effect is the same as ANDing all clauses
-# s.add(c1)
-# s.add(c2)
-# s.add(c3)
+    distinctRule = constructDistinctRule(arr,colorList)
+    colorCellRule = []
 
-
-# Check if satisfiable
-if s.check().r > 0:
-    print('Satisfiable')
-# Not satisfiable
-else:
-    print('Unsatisfiable')
-
-
-
-#######################################
-# Now do the same but more dynamic... #
-#######################################
-
-
-# Construct a solver from an array of clauses in CNF form
-def construct_solver(vars, clauses):
-    for (i, cl) in enumerate(clauses):
-        clauses[i] = [vars[key] if key[0] != '-' else Not(vars[key[1:]]) for key in cl]
-
-    clauses = map(lambda clause: Or(*clause), clauses)
-    formula = And(*clauses)
+    for k in range(0,len(colorList)):
+        colorCellRule.append(constructcolorCellRule(k,arr,processedArr[k],len(arr)))
 
     s = Solver()
-    s.add(formula)
+
+    for rule in distinctRule:
+        s.add(rule)
+    for rule in colorCellRule:
+        s.add(rule)
 
     return s
 
+def getSolution(arr):
 
-# Print the solution
-def print_solution(vars, solver):
-    if solver.check().r > 0:
-        print('Satisfiable')
-        model = solver.model()
-        values = {key: model.get_interp(value) for (key, value) in vars.items()}
+    s = constructFormula(arr)
 
-        # Alternatively, you can extract the variables from the solver itself
-        # values = { key.name(): model.get_interp(key) for key in model }
-
-        solution = ' & '.join([key if value else '-' + key for (key, value) in values.items()])
-        print(solution)
+    if s.check().r > 0:
+        print("YES")
     else:
-        print('Unsatisfiable')
+        print("NO")
 
 
-# Now just call the functions...
-vars = {c: Bool(c) for c in 'abcdefg'}
-clauses = [['b', 'd', '-f'], ['a', '-c', 'e'], ['-a', 'f'], ['a']]
-solver = construct_solver(vars, clauses)
-print_solution(vars, solver)
+getSolution(arr)
