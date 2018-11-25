@@ -25,25 +25,30 @@ NO
     ]
 """
 arr = [
-[1,0,2],
-[0,0,0],
-[2,0,1]
-]
+    [1,0,0,3,0],
+    [2,0,0,0,0],
+    [0,0,0,1,0],
+    [0,3,0,0,2],
+    [0,0,0,0,0]]
 
-def constructDistinctRule(arr,colorList):
-    #
+def construct3Dbool(arr,colorList):
+    # create a 3d matrix of boolean vars
     n = len(arr)
     numColors = len(colorList)
-
-    # create a 3d matrix of boolean vars
-
     m = []
-    colorClause = []
+
     for i in range(0,numColors):
         eachColorM = []
         for j in range(0,n):
             eachColorM.append(BoolVector("m"+str(i)+"_"+str(j),n))
         m.append(eachColorM)
+    return m
+
+def constructDistinctRule(arr,colorList,m):
+    #
+    n = len(arr)
+    numColors = len(colorList)
+    colorClause = []
 
     print(len(m),"  ",len(m[0]),"  ",len(m[0][0]))
     for k in range(0,numColors-1): # each color
@@ -159,12 +164,12 @@ def constructFormula(arr):
 
     for i in processedArr:
         print(i)
-
-    distinctRule = constructDistinctRule(arr,colorList)
+    m = construct3Dbool(arr,colorList)
+    distinctRule = constructDistinctRule(arr,colorList,m)
     colorCellRule = []
 
     for k in range(0,len(colorList)):
-        colorCellRule.append(constructcolorCellRule(k,arr,processedArr[k]))
+        colorCellRule.append(constructcolorCellRule(k,m,processedArr[k]))
 
     s = Solver()
 
