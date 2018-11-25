@@ -40,14 +40,20 @@ def constructDistinctRule(arr,colorList):
     m = []
     colorClause = []
     for i in range(0,numColors):
-        m.append([BoolVector(n)])
-        for j in range(1,n):
-            m.append([BoolVector(n)])
+        eachColorM = []
+        for j in range(0,n):
+            eachColorM.append(BoolVector("m"+str(i)+"_"+str(j),n))
+        m.append(eachColorM)
+
+    print(len(m),"  ",len(m[0]),"  ",len(m[0][0]))
     for k in range(0,numColors-1): # each color
         for i in range(0,n): # each row
             for j in range(0,n): # each colum
                 for k2 in range(k+1,numColors): # each color
+                    #print("K : ", k, " i: ", i, " j: ", j)
+                    #print("K2: ", k2, " i: ", i, " j: ", j)
                     colorClause.append( Or(Not(m[k][i][j]), m[k2][i][j])) # color in this cell implies no other color in other cells
+
 
     return colorClause
     
@@ -126,7 +132,6 @@ def constructcolorCellRule(k,matrix,currentColorMatrix):
 def transformInput(arr,colorList):
 
     processedArr = []
-
     for k in colorList:
         colorM = []
         for i in range(0,len(arr)):
@@ -140,22 +145,26 @@ def transformInput(arr,colorList):
 def getColorList(arr):
     numColor = {0}
     for i in range(0, len(arr)):
-        numColor.union(set(arr[i]))
+        numColor = numColor.union(set(arr[i]))
 
     colorList = list(numColor)
     colorList.sort()
     colorList.pop(0)  # take out color 0
+    print(colorList)
     return colorList
 
 def constructFormula(arr):
     colorList = getColorList(arr)
     processedArr = transformInput(arr,colorList)
 
+    for i in processedArr:
+        print(i)
+
     distinctRule = constructDistinctRule(arr,colorList)
     colorCellRule = []
 
     for k in range(0,len(colorList)):
-        colorCellRule.append(constructcolorCellRule(k,arr,processedArr[k],len(arr)))
+        colorCellRule.append(constructcolorCellRule(k,arr,processedArr[k]))
 
     s = Solver()
 
