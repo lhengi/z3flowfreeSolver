@@ -112,75 +112,76 @@ def constructcolorCellRule(k,matrix,currentColorMatrix):
     clauses = []
 
     for i in range(1,n-1):
-
         for j in range(1,n-1):
+            a = matrix[k][i + 1][j]
+            b = matrix[k][i - 1][j]
+            c = matrix[k][i][j + 1]
+            d = matrix[k][i][j - 1]
             if currentColorMatrix[i][j] == 1:
 
-                clauses.append( Or( matrix[k][i + 1][j], matrix[k][i - 1][j] , matrix[k][i][j + 1], matrix[k][i][j - 1] ) )
+                # start and end node should have exactly one neighbors with same color
 
-                clauses.append(Implies(matrix[k][i + 1][j], Not(matrix[k][i - 1][j])))
-                clauses.append(Implies(matrix[k][i + 1][j], Not(matrix[k][i][j + 1])))
-                clauses.append(Implies(matrix[k][i + 1][j], Not(matrix[k][i][j - 1])))
+                clauses.append( Or( a, b , c, d ) )         # a or b or c or d
 
-                clauses.append(Implies(matrix[k][i - 1][j], Not(matrix[k][i][j + 1])))
-                clauses.append(Implies(matrix[k][i - 1][j], Not(matrix[k][i][j - 1])))
+                clauses.append(Implies(a, Not(b)))          # a -> -b
+                clauses.append(Implies(a, Not(c)))          # a -> -c
+                clauses.append(Implies(a, Not(d)))          # a -> -d
 
-                clauses.append(Implies(matrix[k][i][j + 1], Not(matrix[k][i][j - 1])))
+                clauses.append(Implies(b, Not(c)))          # b -> -c
+                clauses.append(Implies(b, Not(d)))          # b -> -d
+
+                clauses.append(Implies(c, Not(d)))          # c -> -d
             else:
 
                 """
+                None start or end node should have exactly two neighbors with same color
                      a 
                     b c
                      d
                      
-                    a or b or c or d
-                    a -> (b or c or d)
-                    (a -> b) -> -c
-                    (a -> b) -> -d
-                    (a -> c) -> -b
-                    (a -> c) -> -d
-                    (a -> d) -> -b
-                    (a -> d) -> -c
+                    # a or b or c or d
+                    # a -> (b or c or d)
+                    # (a -> b) -> -c
+                    # (a -> b) -> -d
+                    # (a -> c) -> -b
+                    # (a -> c) -> -d
+                    # (a -> d) -> -b
+                    # (a -> d) -> -c
                     
-                    b -> (a or c or d)
-                    (b -> c) -> -a
-                    (b -> c) -> -d
-                    (b -> d) -> -a
-                    (b -> d) -> -c
+                    # b -> (a or c or d)
+                    # (b -> c) -> -a
+                    # (b -> c) -> -d
+                    # (b -> d) -> -a
+                    # (b -> d) -> -c
                     
-                    c -> (a or b or d)
-                    (c -> d) -> -a
-                    (c -> d) -> -b
+                    # c -> (a or b or d)
+                    # (c -> d) -> -a
+                    # (c -> d) -> -b
                 """
                 print("k: ",k," i: ",i," j: ",j)
 
                 # need to consider edge cases
-                a = matrix[k][i + 1][j]
-                b = matrix[k][i - 1][j]
-                c = matrix[k][i][j + 1]
-                d = matrix[k][i][j - 1]
 
-                clauses.append( Or( matrix[k][i + 1][j], matrix[k][i - 1][j], matrix[k][i][j + 1], matrix[k][i][j - 1] ))
 
-                clauses.append( Implies(matrix[k][i + 1][j], Or(matrix[k][i - 1][j], matrix[k][i][j + 1], matrix[k][i][j - 1])) )
-                clauses.append( Implies( Implies(matrix[k][i + 1][j], matrix[k][i - 1][j]),Not(matrix[k][i][j + 1]) ) )
+                clauses.append( Or( a, b, c, d ))                   # a or b or c or d
 
-                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i - 1][j]), Not(matrix[k][i][j - 1])))
-                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i - 1][j]), Not(matrix[k][i][j + 1])))
-                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i][j + 1]), Not(matrix[k][i - 1][j])))
-                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i][j + 1]), Not(matrix[k][i][j - 1])))
-                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i][j - 1]), Not(matrix[k][i - 1][j])))
-                clauses.append(Implies(Implies(matrix[k][i + 1][j], matrix[k][i][j - 1]), Not(matrix[k][i][j + 1])))
+                clauses.append( Implies(a, Or(b, c, d)) )           # a -> (b or c or d)
+                clauses.append(Implies(Implies(a, b), Not(c)))      # (a -> b) -> -c
+                clauses.append(Implies(Implies(a, b), Not(d)))      # (a -> b) -> -d
+                clauses.append(Implies(Implies(a, c), Not(b)))      # (a -> c) -> -b
+                clauses.append(Implies(Implies(a, c), Not(d)))      # (a -> c) -> -d
+                clauses.append(Implies(Implies(a, d), Not(b)))      # (a -> d) -> -b
+                clauses.append(Implies(Implies(a, d), Not(c)))      # (a -> d) -> -c
 
-                clauses.append( Implies(matrix[k][i - 1][j], Or(matrix[k][i + 1][j], matrix[k][i][j + 1], matrix[k][i][j - 1])))
-                clauses.append(Implies(Implies(matrix[k][i - 1][j], matrix[k][i][j + 1]), Not(matrix[k][i + 1][j])))
-                clauses.append(Implies(Implies(matrix[k][i - 1][j], matrix[k][i][j + 1]), Not(matrix[k][i][j - 1])))
-                clauses.append(Implies(Implies(matrix[k][i - 1][j], matrix[k][i][j - 1]), Not(matrix[k][i + 1][j])))
-                clauses.append(Implies(Implies(matrix[k][i - 1][j], matrix[k][i][j - 1]), Not(matrix[k][i][j + 1])))
+                clauses.append( Implies(b, Or(a, c, d)))            # b -> (a or c or d)
+                clauses.append(Implies(Implies(b, c), Not(a)))      # (b -> c) -> -a
+                clauses.append(Implies(Implies(b, c), Not(d)))      # (b -> c) -> -d
+                clauses.append(Implies(Implies(b, d), Not(a)))      # (b -> d) -> -a
+                clauses.append(Implies(Implies(b, d), Not(c)))      # (b -> d) -> -c
 
-                clauses.append( Implies(matrix[k][i][j + 1], Or(matrix[k][i + 1][j], matrix[k][i - 1][j], matrix[k][i][j - 1])))
-                clauses.append(Implies(Implies(matrix[k][i][j + 1], matrix[k][i][j - 1]), Not(matrix[k][i + 1][j])))
-                clauses.append(Implies(Implies(matrix[k][i][j + 1], matrix[k][i][j - 1]), Not(matrix[k][i - 1][j])))
+                clauses.append( Implies(c, Or(a, b, d)))            # c -> (a or b or d)
+                clauses.append(Implies(Implies(c, d), Not(a)))      # (c -> d) -> -a
+                clauses.append(Implies(Implies(c, d), Not(b)))      # (c -> d) -> -b
     return clauses
 
 
