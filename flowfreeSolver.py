@@ -32,10 +32,10 @@ NO
     ]
 """
 arr = [
-[1,0,2],
-[0,0,0],
-[1,0,2]
-]
+    [1,0,2],
+    [0,0,0],
+    [2,0,1]
+    ]
 
 
 def construct3Dbool(arr,colorList):
@@ -139,7 +139,7 @@ def constructcolorCellRule(k,matrix,currentColorMatrix):
 
                 # need to consider edge cases
 
-                clauses.append(Or(a, b, c, d))  # a or b or c or d
+                clauses.append(Or(Not(matrix[k][i][j]), a, b, c, d))  # a or b or c or d
 
                 # a or b or c or d
                 # a -> (b or c or d)
