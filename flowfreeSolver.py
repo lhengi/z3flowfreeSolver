@@ -139,49 +139,52 @@ def constructcolorCellRule(k,matrix,currentColorMatrix):
                     b c
                      d
                      
-                    # a or b or c or d
-                    # a -> (b or c or d)
-                    # (a -> b) -> -c
-                    # (a -> b) -> -d
-                    # (a -> c) -> -b
-                    # (a -> c) -> -d
-                    # (a -> d) -> -b
-                    # (a -> d) -> -c
                     
-                    # b -> (a or c or d)
-                    # (b -> c) -> -a
-                    # (b -> c) -> -d
-                    # (b -> d) -> -a
-                    # (b -> d) -> -c
+                    
+                    
                     
                     # c -> (a or b or d)
-                    # (c -> d) -> -a
-                    # (c -> d) -> -b
+                    # c & d -> -a       -c or -d or -a
+                    # c & d -> -b       -c or -d or -b
                 """
-                print("k: ",k," i: ",i," j: ",j)
 
                 # need to consider edge cases
 
-
                 clauses.append( Or( a, b, c, d ))                   # a or b or c or d
 
-                clauses.append( Implies(a, Or(b, c, d)) )           # a -> (b or c or d)
-                clauses.append(Implies(Implies(a, b), Not(c)))      # (a -> b) -> -c
-                clauses.append(Implies(Implies(a, b), Not(d)))      # (a -> b) -> -d
-                clauses.append(Implies(Implies(a, c), Not(b)))      # (a -> c) -> -b
-                clauses.append(Implies(Implies(a, c), Not(d)))      # (a -> c) -> -d
-                clauses.append(Implies(Implies(a, d), Not(b)))      # (a -> d) -> -b
-                clauses.append(Implies(Implies(a, d), Not(c)))      # (a -> d) -> -c
+                # a or b or c or d
+                # a -> (b or c or d)
+                # a & b -> -c       -a or -b or -c
+                # a & b -> -d       -a or -b or -d
+                # a & c -> -b       -a or -c or -b
+                # a & c -> -d       -a or -c or -d
+                # a & d -> -b       -a or -d or -b
+                # a & d -> -c       -a or -d or -c
+                clauses.append( Implies(a, Or(b, c, d)) )
+                clauses.append(Or(Not(a), Not(b), Not(c)))
+                clauses.append(Or(Not(a), Not(b), Not(d)))
+                clauses.append(Or(Not(a), Not(c), Not(b)))
+                clauses.append(Or(Not(a), Not(c), Not(d)))
+                clauses.append(Or(Not(a), Not(d), Not(b)))
+                clauses.append(Or(Not(a), Not(d), Not(c)))
 
-                clauses.append( Implies(b, Or(a, c, d)))            # b -> (a or c or d)
-                clauses.append(Implies(Implies(b, c), Not(a)))      # (b -> c) -> -a
-                clauses.append(Implies(Implies(b, c), Not(d)))      # (b -> c) -> -d
-                clauses.append(Implies(Implies(b, d), Not(a)))      # (b -> d) -> -a
-                clauses.append(Implies(Implies(b, d), Not(c)))      # (b -> d) -> -c
+                # b -> (a or c or d)
+                # b & c -> -a       -b or -c or -a
+                # b & c -> -d       -b or -c or -d
+                # b & d -> -a       -b or -d or -a
+                # b & d -> -c       -b or -d or -c
+                clauses.append( Implies(b, Or(a, c, d)))
+                clauses.append(Or(Not(b), Not(c), Not(a)))
+                clauses.append(Or(Not(b), Not(c), Not(d)))
+                clauses.append(Or(Not(b), Not(d), Not(a)))
+                clauses.append(Or(Not(b), Not(d), Not(c)))
 
-                clauses.append( Implies(c, Or(a, b, d)))            # c -> (a or b or d)
-                clauses.append(Implies(Implies(c, d), Not(a)))      # (c -> d) -> -a
-                clauses.append(Implies(Implies(c, d), Not(b)))      # (c -> d) -> -b
+                # c -> (a or b or d)
+                # c & d -> -a       -c or -d or -a
+                # c & d -> -b       -c or -d or -b
+                clauses.append( Implies(c, Or(a, b, d)))
+                clauses.append(Or(Not(c), Not(d), Not(a)))
+                clauses.append(Or(Not(c), Not(d), Not(b)))
     return clauses
 
 
