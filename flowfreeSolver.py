@@ -150,7 +150,7 @@ def constructcolorCellRule(k,matrix,currentColorMatrix):
 
                 # need to consider edge cases
 
-                clauses.append( Or( a, b, c, d ))                   # a or b or c or d
+                clauses.append(Or(a, b, c, d))  # a or b or c or d
 
                 # a or b or c or d
                 # a -> (b or c or d)
@@ -160,31 +160,24 @@ def constructcolorCellRule(k,matrix,currentColorMatrix):
                 # a & c -> -d       -a or -c or -d
                 # a & d -> -b       -a or -d or -b
                 # a & d -> -c       -a or -d or -c
-                clauses.append( Implies(a, Or(b, c, d)) )
+                clauses.append(Implies(a, Or(b, c, d)))
                 clauses.append(Or(Not(a), Not(b), Not(c)))
                 clauses.append(Or(Not(a), Not(b), Not(d)))
-                clauses.append(Or(Not(a), Not(c), Not(b)))
                 clauses.append(Or(Not(a), Not(c), Not(d)))
-                clauses.append(Or(Not(a), Not(d), Not(b)))
-                clauses.append(Or(Not(a), Not(d), Not(c)))
 
                 # b -> (a or c or d)
                 # b & c -> -a       -b or -c or -a
                 # b & c -> -d       -b or -c or -d
                 # b & d -> -a       -b or -d or -a
                 # b & d -> -c       -b or -d or -c
-                clauses.append( Implies(b, Or(a, c, d)))
-                clauses.append(Or(Not(b), Not(c), Not(a)))
+                clauses.append(Implies(b, Or(a, c, d)))
                 clauses.append(Or(Not(b), Not(c), Not(d)))
-                clauses.append(Or(Not(b), Not(d), Not(a)))
-                clauses.append(Or(Not(b), Not(d), Not(c)))
 
                 # c -> (a or b or d)
                 # c & d -> -a       -c or -d or -a
                 # c & d -> -b       -c or -d or -b
-                clauses.append( Implies(c, Or(a, b, d)))
-                clauses.append(Or(Not(c), Not(d), Not(a)))
-                clauses.append(Or(Not(c), Not(d), Not(b)))
+                clauses.append(Implies(c, Or(a, b, d)))
+                clauses.append(Implies(d, Or(a, b, c)))
     return clauses
 
 
@@ -207,8 +200,9 @@ def constructFormula(arr):
     for rule in distinctRule:
         s.add(rule) # should be fine
     for rule in colorCellRule:
-        print(rule)
         s.add(rule)
+
+    print(s)
 
     return s
 
