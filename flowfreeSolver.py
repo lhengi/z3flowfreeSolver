@@ -135,17 +135,6 @@ def constructcolorCellRule(k,matrix,currentColorMatrix):
 
                 """
                 None start or end node should have exactly two neighbors with same color
-                     a 
-                    b c
-                     d
-                     
-                    
-                    
-                    
-                    
-                    # c -> (a or b or d)
-                    # c & d -> -a       -c or -d or -a
-                    # c & d -> -b       -c or -d or -b
                 """
 
                 # need to consider edge cases
@@ -201,8 +190,6 @@ def constructFormula(arr):
         s.add(rule) # should be fine
     for rule in colorCellRule:
         s.add(rule)
-
-    print(s)
 
     return s
 
