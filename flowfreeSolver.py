@@ -1,14 +1,15 @@
 from z3 import Solver, Bool, Bools, Or, And, Not, Implies, If, BoolVector
+import numpy as np
 
-# test
 """
 YES
-   [[0,0,0,0,0,0],
-    [1,0,0,0,3,0],
-    [2,0,0,0,0,0],
-    [0,0,0,0,1,0],
-    [0,0,3,0,0,2]]
-    
+    [0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 3, 0],
+    [2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0],
+    [0, 0, 3, 0, 0, 2],
+    [0, 0, 0, 0, 0, 0]
+
 NO
     [
     [1,0,0,3,0],
@@ -30,183 +31,169 @@ NO
     [0,0,0],
     [2,0,1]
     ]
+
+YES
+    [
+    [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,1,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,7,0,9,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0],
+    [0,0,0,0,7,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,5,0,0,0,0,0,0,2,0,0,0,0,0,2,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [8,0,0,0,0,0,0,0,0,0,0,0,3,0,0,8,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0],
+    [0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    ]
 """
 arr = [
-[1,0,2],
-[0,0,0],
-[1,0,2]
+    [10, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 9, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 7, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 8, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]
 ]
 
-
-def construct3Dbool(arr,colorList):
-    # create a 3d matrix of boolean vars
+def constructMy3Dbool(arr, colorList):
     n = len(arr)
+
     numColors = len(colorList)
     m = []
 
-    for i in range(0,numColors):
+    for i in range(0, numColors):
         eachColorM = []
-        for j in range(0,n+2):
-            eachColorM.append(BoolVector("m"+str(i)+"_"+str(j),n+2))
+        for j in range(0, n):
+            eachColorM.append(BoolVector("m" + str(i) + "_" + str(j), n))
         m.append(eachColorM)
-
 
     return m
 
-def transformInput(arr,colorList):
 
-    # add 0 edges and set the to false to later, so we don't need to handle edge cases
-    processedArr = []
-    for k in colorList:
-        colorM = []
-        colorM.append([0]*(len(arr)+2))
-        for i in range(0,len(arr)):
-            colorRow = [0]
-            for j in range(0,len(arr[0])):
-                colorRow.append(1 if arr[i][j] == k else 0)
-            colorRow.append(0)
-            colorM.append(colorRow)
-        colorM.append([0] * (len(arr) + 2))
-        processedArr.append(colorM)
-
-    return processedArr
 def getColorList(arr):
     numColor = {0}
     for i in range(0, len(arr)):
         numColor = numColor.union(set(arr[i]))
 
     colorList = list(numColor)
+
     colorList.sort()
-    colorList.pop(0)  # take out color 0
     return colorList
 
-def constructDistinctRule(colorList,m):
-    #
-    n = len(m[0])
+
+def addDistinctRule(myBools, x, colorList):
+    n = len(myBools[0])
     numColors = len(colorList)
-    colorClause = []
 
-    print(len(m),"  ",len(m[0]),"  ",len(m[0][0]))
-    for k in range(0,numColors): # each color
-        for i in range(0,n ): # each row
-            for j in range(0,n): # each colum
-                if i == 0 or j == 0 or i == n - 1 or j == n -1:
-                    colorClause.append(Not(m[k][i][j]))
-                    continue
-                for k2 in range(0,numColors): # each color
-                    #print("K : ", k, " i: ", i, " j: ", j)
-                    #print("K2: ", k2, " i: ", i, " j: ", j)
-                    if k == k2:
-                        continue
-                    colorClause.append( Or(Not(m[k][i][j]), Not(m[k2][i][j]))) # color in this cell implies no other color in other cells
+    for k in range(0, numColors):  # each color
+        for i in range(0, n):  # each row
+            for j in range(0, n):  # each column
+                for k2 in range(0, numColors):  # each color
+                    if k != k2 and k2 > k:
+                        x.add(Or(Not(myBools[k][i][j]),
+                                 Not(myBools[k2][i][j])))  # color in this cell implies no other color in other cells
+    return x
 
 
-    return colorClause
-    
+def addColorRule(k, myBools, arr, x):
+    n = len(myBools[0])
+    for i in range(0, n):
+        for j in range(0, n):
+            a = False;
+            b = False;
+            c = False;
+            d = False;
 
+            if (i < n - 1):
+                a = myBools[k][i + 1][j]
+            if (i > 0):
+                b = myBools[k][i - 1][j]
+            if (j < n - 1):
+                c = myBools[k][i][j + 1]
+            if (j > 0):
+                d = myBools[k][i][j - 1]
 
+            if arr[i][j] == k and k != 0:
 
-def constructcolorCellRule(k,matrix,currentColorMatrix):
-    # currentColorMatrix should only contains 0 and 1, where 1 is start and end
-    n = len(matrix[0])
-    clauses = []
+                x.add(myBools[k][i][j])
 
-    for i in range(1,n-1):
-        for j in range(1,n-1):
-            a = matrix[k][i + 1][j]
-            b = matrix[k][i - 1][j]
-            c = matrix[k][i][j + 1]
-            d = matrix[k][i][j - 1]
-            if currentColorMatrix[i][j] == 1:
+                x.add(Or(a, b, c, d))  # a or b or c or d
 
-                # start and end node should have exactly one neighbors with same color
+                x.add(Implies(a, Not(b)))  # a -> -b
+                x.add(Implies(a, Not(c)))  # a -> -c
+                x.add(Implies(a, Not(d)))  # a -> -d
 
-                clauses.append( Or( a, b , c, d ) )         # a or b or c or d
+                x.add(Implies(b, Not(c)))  # b -> -c
+                x.add(Implies(b, Not(d)))  # b -> -d
 
-                clauses.append(Implies(a, Not(b)))          # a -> -b
-                clauses.append(Implies(a, Not(c)))          # a -> -c
-                clauses.append(Implies(a, Not(d)))          # a -> -d
-
-                clauses.append(Implies(b, Not(c)))          # b -> -c
-                clauses.append(Implies(b, Not(d)))          # b -> -d
-
-                clauses.append(Implies(c, Not(d)))          # c -> -d
+                x.add(Implies(c, Not(d)))  # c -> -d
             else:
 
-                """
-                None start or end node if it is in the path then it should have exactly two neighbors with same color
-                """
+                x.add(Or(Not(myBools[k][i][j]), Or(a, b, c, d)))  # a or b or c or d
 
-                # it's either not in the path node or
-                clauses.append(Implies(matrix[k][i][j],Or(And(a,b,Not(c),Not(d)), And( a,Not(b),c,Not(d), And(a, Not(b),
-                                Not(c),d), And(Not(a), b, c, Not(d)), And( Not(a),b, Not(c),d ), And(Not(a), Not(b), c, d) ))))
-                """
-                
-                clauses.append(Or(Not(matrix[k][i][j]), a, b, c, d))  # a or b or c or d
+                x.add(Or(Not(myBools[k][i][j]), Implies(a, Or(b, c, d))))
+                x.add(Or(Not(myBools[k][i][j]), Or(Not(a), Not(b), Not(c))))
+                x.add(Or(Not(myBools[k][i][j]), Or(Not(a), Not(b), Not(d))))
+                x.add(Or(Not(myBools[k][i][j]), Or(Not(a), Not(c), Not(d))))
 
-                # a or b or c or d
-                # a -> (b or c or d)
-                # a & b -> -c       -a or -b or -c
-                # a & b -> -d       -a or -b or -d
-                # a & c -> -b       -a or -c or -b
-                # a & c -> -d       -a or -c or -d
-                # a & d -> -b       -a or -d or -b
-                # a & d -> -c       -a or -d or -c
-                #Implies(matrix[k][i][j])
-                clauses.append(Implies(matrix[k][i][j],Implies(a, Or(b, c, d))))
-                clauses.append(Implies(matrix[k][i][j],Or(Not(a), Not(b), Not(c))))
-                clauses.append(Implies(matrix[k][i][j],Or(Not(a), Not(b), Not(d))))
-                clauses.append(Implies(matrix[k][i][j],Or(Not(a), Not(c), Not(d))))
+                x.add(Or(Not(myBools[k][i][j]), Implies(b, Or(a, c, d))))
+                x.add(Or(Not(myBools[k][i][j]), Or(Not(b), Not(c), Not(d))))
 
-                # b -> (a or c or d)
-                # b & c -> -a       -b or -c or -a
-                # b & c -> -d       -b or -c or -d
-                # b & d -> -a       -b or -d or -a
-                # b & d -> -c       -b or -d or -c
-                clauses.append(Implies(matrix[k][i][j],Implies(b, Or(a, c, d))))
-                clauses.append(Implies(matrix[k][i][j],Or(Not(b), Not(c), Not(d))))
+                x.add(Or(Not(myBools[k][i][j]), Implies(c, Or(a, b, d))))
+                x.add(Or(Not(myBools[k][i][j]), Implies(d, Or(a, b, c))))
+    return x
 
-                # c -> (a or b or d)
-                # c & d -> -a       -c or -d or -a
-                # c & d -> -b       -c or -d or -b
-                clauses.append(Implies(matrix[k][i][j],Implies(c, Or(a, b, d))))
-                clauses.append(Implies(matrix[k][i][j],Implies(d, Or(a, b, c))))
-                """
-    return clauses
-
-
-
-def constructFormula(arr):
-    colorList = getColorList(arr)
-    processedArr = transformInput(arr,colorList)
-
-    for i in processedArr:
-        print(i)
-    m = construct3Dbool(arr,colorList)
-    distinctRule = constructDistinctRule(colorList,m)
-    colorCellRule = []
-
-    for k in range(0,len(colorList)):
-        colorCellRule.append(constructcolorCellRule(k,m,processedArr[k]))
-
-    s = Solver()
-
-    for rule in distinctRule:
-        s.add(rule) # should be fine
-
-    for rule in colorCellRule:
-        for clause in rule:
-            s.add(clause)
-
-    return s
 
 def getSolution(arr):
+    x = Solver()
+    colorList = getColorList(arr)
+    myBools = constructMy3Dbool(arr, colorList)
 
-    s = constructFormula(arr)
+    x = addDistinctRule(myBools, x, colorList)
 
+    for k in range(0, len(colorList)):
+        x = addColorRule(k, myBools, arr, x)
 
-    if s.check() == "sat":
+    # print(x)
+
+    if x.check().r > 0:
         print("YES")
+        print()
+        # print(x.model())
+
+        myArray = np.zeros((len(myBools[0]), len(myBools[0])), dtype=np.int)
+        for k in range(0, len(colorList)):  # each color
+            for i in range(0, len(myBools[0])):  # each row
+                for j in range(0, len(myBools[0])):  # each column
+                    if x.model().get_interp(myBools[k][i][j]):
+                        myArray[i][j] = k
+
+        print(myArray)
+
     else:
         print("NO")
 
