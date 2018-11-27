@@ -32,10 +32,10 @@ NO
     ]
 """
 arr = [
-    [1,0,2],
-    [0,0,0],
-    [2,0,1]
-    ]
+[1,0,2],
+[0,0,0],
+[1,0,2]
+]
 
 
 def construct3Dbool(arr,colorList):
@@ -98,7 +98,7 @@ def constructDistinctRule(colorList,m):
                     #print("K2: ", k2, " i: ", i, " j: ", j)
                     if k == k2:
                         continue
-                    colorClause.append( Or(Not(m[k][i][j]), m[k2][i][j])) # color in this cell implies no other color in other cells
+                    colorClause.append( Or(Not(m[k][i][j]), Not(m[k2][i][j]))) # color in this cell implies no other color in other cells
 
 
     return colorClause
@@ -134,11 +134,14 @@ def constructcolorCellRule(k,matrix,currentColorMatrix):
             else:
 
                 """
-                None start or end node should have exactly two neighbors with same color
+                None start or end node if it is in the path then it should have exactly two neighbors with same color
                 """
 
-                # need to consider edge cases
-
+                # it's either not in the path node or
+                clauses.append(Implies(matrix[k][i][j],Or(And(a,b,Not(c),Not(d)), And( a,Not(b),c,Not(d), And(a, Not(b),
+                                Not(c),d), And(Not(a), b, c, Not(d)), And( Not(a),b, Not(c),d ), And(Not(a), Not(b), c, d) ))))
+                """
+                
                 clauses.append(Or(Not(matrix[k][i][j]), a, b, c, d))  # a or b or c or d
 
                 # a or b or c or d
@@ -149,24 +152,26 @@ def constructcolorCellRule(k,matrix,currentColorMatrix):
                 # a & c -> -d       -a or -c or -d
                 # a & d -> -b       -a or -d or -b
                 # a & d -> -c       -a or -d or -c
-                clauses.append(Implies(a, Or(b, c, d)))
-                clauses.append(Or(Not(a), Not(b), Not(c)))
-                clauses.append(Or(Not(a), Not(b), Not(d)))
-                clauses.append(Or(Not(a), Not(c), Not(d)))
+                #Implies(matrix[k][i][j])
+                clauses.append(Implies(matrix[k][i][j],Implies(a, Or(b, c, d))))
+                clauses.append(Implies(matrix[k][i][j],Or(Not(a), Not(b), Not(c))))
+                clauses.append(Implies(matrix[k][i][j],Or(Not(a), Not(b), Not(d))))
+                clauses.append(Implies(matrix[k][i][j],Or(Not(a), Not(c), Not(d))))
 
                 # b -> (a or c or d)
                 # b & c -> -a       -b or -c or -a
                 # b & c -> -d       -b or -c or -d
                 # b & d -> -a       -b or -d or -a
                 # b & d -> -c       -b or -d or -c
-                clauses.append(Implies(b, Or(a, c, d)))
-                clauses.append(Or(Not(b), Not(c), Not(d)))
+                clauses.append(Implies(matrix[k][i][j],Implies(b, Or(a, c, d))))
+                clauses.append(Implies(matrix[k][i][j],Or(Not(b), Not(c), Not(d))))
 
                 # c -> (a or b or d)
                 # c & d -> -a       -c or -d or -a
                 # c & d -> -b       -c or -d or -b
-                clauses.append(Implies(c, Or(a, b, d)))
-                clauses.append(Implies(d, Or(a, b, c)))
+                clauses.append(Implies(matrix[k][i][j],Implies(c, Or(a, b, d))))
+                clauses.append(Implies(matrix[k][i][j],Implies(d, Or(a, b, c))))
+                """
     return clauses
 
 
@@ -188,8 +193,10 @@ def constructFormula(arr):
 
     for rule in distinctRule:
         s.add(rule) # should be fine
+
     for rule in colorCellRule:
-        s.add(rule)
+        for clause in rule:
+            s.add(clause)
 
     return s
 
@@ -197,7 +204,8 @@ def getSolution(arr):
 
     s = constructFormula(arr)
 
-    if s.check().r > 0:
+
+    if s.check() == "sat":
         print("YES")
     else:
         print("NO")
